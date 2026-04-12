@@ -17,6 +17,8 @@
     font-family: 'Prompt', sans-serif; 
 }
 
+/* Home */
+
 body {
     background-color: #E9ECEF;
     display: flex;
@@ -208,6 +210,7 @@ body {
     border-top-left-radius: 25px;
     border-top-right-radius: 25px;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+    z-index: 20;
 }
 
 .nav-item {
@@ -243,3 +246,151 @@ body {
 .nav-item.active .icon-wrapper {
     background-color: var(--secondary); 
 }
+
+/* Show Map */
+
+.map-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.map-background {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url('photo/map-show.png');
+    background-position: center;
+    background-color: var(--bg-main); 
+    z-index: 0;
+}
+
+.bottom-sheet {
+    position: absolute;
+    bottom: 76px; 
+    left: 0;
+    width: 100%;
+    background: var(--bg-main);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    z-index: 10;
+    padding-top: 12px;
+    padding-bottom: 20px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+}
+
+.drag-handle {
+    width: 40px;
+    height: 4px;
+    background-color: var(--bg-main);
+    border-radius: 2px;
+    margin: 0 auto 10px auto;
+}
+
+.cards-scroll {
+    display: flex;
+    gap: 16px;
+    padding: 12px 0 12px 20px;
+    scroll-padding: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+
+.cards-scroll::after {
+    content: "";
+    min-width: 4px;
+    flex-shrink: 0;
+}
+
+.cards-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.toilet-card {
+    min-width: 280px;
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--bg-main);
+    border: 1px solid #F0F0F0;
+    border-radius: 16px;
+    padding: 12px;
+    scroll-snap-align: start; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.card-img {
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+    object-fit: cover;
+    background-color: var(--bg-main);
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 12px 0 6px 0;
+    color: var(--black);
+}
+
+.card-status-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.status-open { color: var(--green); font-weight: 600;}
+.status-time, .card-rating { color: var(--text-gray); }
+.rating-star { color: var(--yellow); }
+
+.card-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-gray);
+    margin-bottom: 15px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-nav, .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Prompt', sans-serif;
+    transition: all 0.2s ease;
+}
+
+.btn-nav {
+    flex: 1.5; 
+    background-color: var(--primary);
+    color: white;
+    border: none;
+}
+
+.btn-action {
+    flex: 1;
+    background-color: white;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-nav:active { background-color: #004494; }
+.btn-action:active { background-color: var(--secondary); }

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jood Jood - Show Map</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="top-bar">
+            <i class="fa-regular fa-face-smile icon-logo"></i>
+            <span class="brand-name">Jood Jood</span>
+        </header>
+
+        <main class="map-content">
+            <div class="map-background"></div>
+
+            <div class="bottom-sheet">
+                <div class="drag-handle"></div>
+                
+                <div class="cards-scroll">
+                    
+                    <div class="toilet-card">
+                        <img src="photo/hongnum.png" alt="ห้องน้ำ SC3" class="card-img">
+                        <h3 class="card-title">ห้องน้ำ SC3 ชั้น 1</h3>
+                        
+                        <div class="card-status-row">
+                            <span><span class="status-open">Open</span> <span class="status-time">• Closes 20:00</span></span>
+                            <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.9 (67)</span>
+                        </div>
+                        
+                        <div class="card-meta-row">
+                            <span class="meta-item"><i class="fa-solid fa-location-dot"></i> 250 เมตร</span>
+                            <span class="meta-item"><i class="fa-regular fa-clock"></i> 5 นาที</span>
+                        </div>
+                        
+                        <div class="card-actions">
+                            <button class="btn-nav"><i class="fa-solid fa-paper-plane"></i> นำทาง</button>
+                            <button class="btn-action"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
+                            <button class="btn-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                        </div>
+                    </div>
+
+                    <div class="toilet-card">
+                        <img src="photo/hongnum.png" alt="ห้องน้ำ SC3" class="card-img">
+                        <h3 class="card-title">ห้องน้ำ SC3 ชั้น 2</h3>
+                        <div class="card-status-row">
+                            <span><span class="status-open">Open</span> <span class="status-time">• Closes 20:00</span></span>
+                            <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.8 (45)</span>
+                        </div>
+                        <div class="card-meta-row">
+                            <span class="meta-item"><i class="fa-solid fa-location-dot"></i> 250 เมตร</span>
+                            <span class="meta-item"><i class="fa-regular fa-clock"></i> 5 นาที</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-nav"><i class="fa-solid fa-paper-plane"></i> นำทาง</button>
+                            <button class="btn-action"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
+                            <button class="btn-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="home.html" class="nav-item active">
+                <div class="icon-wrapper"><i class="fa-solid fa-map"></i></div>
+                <span>ค้นหา</span>
+            </a>
+            <a href="#" class="nav-item">
+                <div class="icon-wrapper"><i class="fa-regular fa-bookmark"></i></div>
+                <span>รายการโปรด</span>
+            </a>
+            <a href="#" class="nav-item">
+                <div class="icon-wrapper"><i class="fa-solid fa-gear"></i></div>
+                <span>ตั้งค่า</span>
+            </a>
+        </nav>
+    </div>
+</body>
+</html>

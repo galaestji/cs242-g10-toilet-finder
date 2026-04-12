@@ -6,6 +6,8 @@
     <title>Jood Jood - Show Map</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,7 +18,7 @@
         </header>
 
         <main class="map-content">
-            <div class="map-background"></div>
+            <div id="map" class="map-background"></div>
 
             <div class="bottom-sheet">
                 <div class="drag-handle"></div>
@@ -62,6 +64,24 @@
                         </div>
                     </div>
 
+                    <div class="toilet-card">
+                        <img src="photo/hongnum.png" alt="ห้องน้ำ SC3" class="card-img">
+                        <h3 class="card-title">ห้องน้ำ SC3 ชั้น 3</h3>
+                        <div class="card-status-row">
+                            <span><span class="status-open">Open</span> <span class="status-time">• Closes 20:00</span></span>
+                            <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.7 (32)</span>
+                        </div>
+                        <div class="card-meta-row">
+                            <span class="meta-item"><i class="fa-solid fa-location-dot"></i> 250 เมตร</span>
+                            <span class="meta-item"><i class="fa-regular fa-clock"></i> 5 นาที</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-nav"><i class="fa-solid fa-paper-plane"></i> นำทาง</button>
+                            <button class="btn-action"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
+                            <button class="btn-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -81,5 +101,28 @@
             </a>
         </nav>
     </div>
+
+    <script>
+        var map = L.map('map', {
+            zoomControl: false 
+        }).setView([14.0722, 100.6053], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var customIcon = L.divIcon({
+            className: 'custom-map-pin',
+            html: '<i class="fa-solid fa-location-dot"></i>', 
+            iconSize: [30, 42],   
+            iconAnchor: [15, 42],
+            popupAnchor: [0, -40]
+        });
+
+        L.marker([14.0722, 100.6053], {icon: customIcon}).addTo(map)
+            .bindPopup('<b>ห้องน้ำ SC3</b><br>เปิดใช้งานอยู่')
+            .openPopup();
+    </script>
 </body>
 </html>

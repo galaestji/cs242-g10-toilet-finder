@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Toilet A",
+    "floor": 1,
+    "info": "Free",
+    "latitude": 18.8045,
+    "longitude": 98.9508,
+    "building_name": "Building A"
+  },
+  {
+    "name": "Toilet B",
+    "floor": 2,
+    "info": "Paid",
+    "latitude": 18.8050,
+    "longitude": 98.9512,
+    "building_name": "Building B"
+  }
+]

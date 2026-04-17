@@ -12,7 +12,10 @@ class Toilet:
         return self.info
 
     def distance_to(self, loc) -> float:
-        return math.sqrt(
-            (self.location.latitude - loc.latitude) ** 2 +
-            (self.location.longitude - loc.longitude) ** 2
-        )
+        R = 6371.0
+        lat1, lon1 = math.radians(self.location.latitude), math.radians(self.location.longitude)
+        lat2, lon2 = math.radians(loc.latitude), math.radians(loc.longitude)
+        dlat, dlon = lat2 - lat1, lon2 - lon1
+        a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return R * c

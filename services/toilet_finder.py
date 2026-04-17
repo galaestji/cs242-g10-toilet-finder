@@ -1,3 +1,5 @@
+import math
+
 class ToiletFinder:
     def __init__(self, all_toilets: list):
         self.all_toilets = all_toilets
@@ -17,6 +19,18 @@ class ToiletFinder:
             self.all_toilets,
             key=lambda toilet: self.calculate_distance(toilet.location, current_location)
         )
-
+#------------ อันนี้แก้ให้สูตรมันตรงกันเฉยๆจร้า ไม่มีไรมากอ้วร ---------------------------------
     def calculate_distance(self, loc1, loc2):
-        return ((loc1.latitude - loc2.latitude) ** 2 + (loc1.longitude - loc2.longitude) ** 2) ** 0.5
+        R = 6371.0 
+        lat1, lon1 = math.radians(loc1.latitude), math.radians(loc1.longitude)
+        lat2, lon2 = math.radians(loc2.latitude), math.radians(loc2.longitude)
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        return R * c
+
+#--------------------------------------------------------------------------------

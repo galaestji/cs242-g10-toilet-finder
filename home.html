@@ -39,10 +39,10 @@
             <div class="search-section">
                 <div class="search-input-box">
                     <i class="fa-solid fa-location-dot location-icon"></i>
-                    <input type="text" value="ตำแหน่งปัจจุบัน" readonly>
+                    <input type="text" id="user-location" placeholder="กรอกตำแหน่งปัจจุบันของคุณ" value="กรอกตำแหน่งปัจจุบันของคุณ">
                 </div>
                 
-                <button class="btn-search">
+                <button class="btn-search" id="search-btn">
                     <i class="fa-solid fa-magnifying-glass"></i> ค้นหาทันที
                 </button>
             </div>
@@ -70,4 +70,29 @@
         </nav>
     </div>
 </body>
+
+<script>
+    const searchBtn = document.getElementById('search-btn');
+    const locationInput = document.getElementById('user-location');
+
+        function goToSearch() {
+        const locationValue = locationInput.value.trim();
+            
+        if (locationValue === "") {
+            alert("กรุณากรอกตำแหน่งก่อนค้นหาครับ");
+            return;
+        }
+
+        window.location.href = `show.html?start=${encodeURIComponent(locationValue)}`;
+    }
+
+    
+    searchBtn.addEventListener('click', goToSearch);
+
+    locationInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            goToSearch();
+        }
+    });
+</script>
 </html>

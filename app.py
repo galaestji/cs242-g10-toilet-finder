@@ -3,14 +3,15 @@ from models.toilet import Toilet
 from models.user import User
 from services.toilet_finder import ToiletFinder
 from services.map_service import MapService 
-from database.db import init_db, get_all_toilets_from_db 
+from database.db import init_db, get_all_toilets_from_db , seed_real_data
 
 def main():
     print("Campus Toilet Finder - Systems Active")
  
 
  #--------------- มีการแก้ไขตรงนี้จ้า แก้สูตรนิดนหน่อย ละก็แก้วิธีแสดงผลจร้า
-    init_db() 
+    init_db()
+    seed_real_data() 
     toilets = get_all_toilets_from_db()
 
     current_location = Location(latitude=18.8040, longitude=98.9503, building_name="Current Location")

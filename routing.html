@@ -72,43 +72,60 @@
         var destLat = 14.0722;
         var destLng = 100.6053;
 
-        // 3. ฟังก์ชันดึงตำแหน่งปัจจุบันและวาดเส้นทาง
+        // 3. ฟังก์ชันดึงตำแหน่งปัจจุบัน (GPS จริง)
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 var userLat = position.coords.latitude;
                 var userLng = position.coords.longitude;
 
-                // วาดเส้นทางนำทาง
-                L.Routing.control({
+                // 4. สร้างระบบนำทาง
+                var control = L.Routing.control({
                     waypoints: [
-                        L.latLng(userLat, userLng), // จุดเริ่ม (จาก GPS จริง)
-                        L.latLng(destLat, destLng)  // จุดหมาย
+                        L.latLng(userLat, userLng), // จุดที่ 1: ตำแหน่งปัจจุบันของคุณ
+                        L.latLng(destLat, destLng)  // จุดที่ 2: ห้องน้ำปลายทาง
                     ],
                     lineOptions: {
-                        styles: [{ color: '#0056B3', weight: 6, opacity: 0.8 }] // เส้นสีน้ำเงินหนาๆ
+                        styles: [{ color: '#007BFF', weight: 7, opacity: 0.8 }] // เส้นสีน้ำเงินหนาๆ ตามรูป
                     },
                     addWaypoints: false,
                     routeWhileDragging: false,
-                    show: false, // ซ่อนกล่องข้อความบอกทาง (ให้ดูคลีน)
+                    draggableWaypoints: false,
+                    show: false, // ซ่อนกล่องคำแนะนำทางด้านข้าง
                     createMarker: function(i, waypoint, n) {
-                        // ปรับแต่งหมุด
-                        var markerHtml = (i === 0) 
-                            ? '<div class="custom-pin pin-start"><i class="fa-solid fa-user"></i></div>'
-                            : '<div class="custom-pin pin-dest"><i class="fa-solid fa-restroom"></i></div>';
-                        
-                        return L.marker(waypoint.latLng, {
-                            icon: L.divIcon({
-                                className: 'clear-default-icon',
-                                html: markerHtml,
+                        // กำหนด Icon ตามตำแหน่ง
+                        var markerIcon;
+                        if (i === 0) {
+                            // จุดเริ่มต้น: รูปวงกลมสีเขียว (User)
+                            markerIcon = L.divIcon({
+                                className: 'custom-pin-container',
+                                html: '<div class="pin-user"><i class="fa-solid fa-location-crosshairs"></i></div>',
                                 iconSize: [40, 40],
                                 iconAnchor: [20, 20]
-                            })
-                        });
+                            });
+                        } else {
+                            // จุดปลายทาง: รูปวงกลมสีม่วง (Restroom)
+                            markerIcon = L.divIcon({
+                                className: 'custom-pin-container',
+                                html: '<div class="pin-restroom"><i class="fa-solid fa-restroom"></i></div>',
+                                iconSize: [40, 40],
+                                iconAnchor: [20, 20]
+                            });
+                        }
+                        return L.marker(waypoint.latLng, { icon: markerIcon });
                     }
                 }).addTo(map);
 
+                // ปรับหน้าจอให้เห็นทั้งสองจุดพอดี
+                control.on('routesfound', function(e) {
+                    var routes = e.routes;
+                    var bounds = L.latLngBounds([userLat, userLng], [destLat, destLng]);
+                    map.fitBounds(bounds, { padding: [100, 100] });
+                });
+
             }, function() {
-                alert("กรุณาอนุญาตการเข้าถึงตำแหน่งเพื่อใช้งานระบบนำทาง");
+                alert("กรุณาเปิด GPS และอนุญาตการเข้าถึงตำแหน่งเพื่อนำทาง");
+            }, {
+                enableHighAccuracy: true // ใช้ GPS ความแม่นยำสูง
             });
         }
     </script>

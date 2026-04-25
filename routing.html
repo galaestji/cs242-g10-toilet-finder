@@ -42,19 +42,30 @@
         </main>
 
         <nav class="bottom-nav">
-            <a href="home.html" class="nav-item">
+            <a href="#" class="nav-item active">
                 <div class="icon-wrapper"><i class="fa-solid fa-map"></i></div>
                 <span>ค้นหา</span>
             </a>
-            <a href="#" class="nav-item">
+            
+            <a href="#" class="nav-item unavailable-feature">
                 <div class="icon-wrapper"><i class="fa-regular fa-bookmark"></i></div>
                 <span>รายการโปรด</span>
             </a>
-            <a href="#" class="nav-item">
+            
+            <a href="#" class="nav-item unavailable-feature">
                 <div class="icon-wrapper"><i class="fa-solid fa-gear"></i></div>
                 <span>ตั้งค่า</span>
             </a>
         </nav>
+    </div>
+
+    <div id="comingSoonPopup" class="custom-popup-overlay">
+        <div class="custom-popup-box">
+            <i class="fa-solid fa-person-digging popup-icon"></i>
+            <h3>กำลังพัฒนา...</h3>
+            <p>ฟีเจอร์นี้ยังไม่เปิดให้บริการ</p>
+            <button class="btn-popup-close" id="closePopupBtn">ตกลง</button>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -81,21 +92,21 @@
                 // 4. สร้างระบบนำทาง
                 var control = L.Routing.control({
                     waypoints: [
-                        L.latLng(userLat, userLng), // จุดที่ 1: ตำแหน่งปัจจุบันของคุณ
-                        L.latLng(destLat, destLng)  // จุดที่ 2: ห้องน้ำปลายทาง
+                        L.latLng(userLat, userLng), // ตำแหน่งปัจจุบันของคุณ
+                        L.latLng(destLat, destLng)  // ห้องน้ำปลายทาง
                     ],
                     lineOptions: {
-                        styles: [{ color: '#007BFF', weight: 7, opacity: 0.8 }] // เส้นสีน้ำเงินหนาๆ ตามรูป
+                        styles: [{ color: '#007BFF', weight: 7, opacity: 0.8 }] 
                     },
                     addWaypoints: false,
                     routeWhileDragging: false,
                     draggableWaypoints: false,
-                    show: false, // ซ่อนกล่องคำแนะนำทางด้านข้าง
+                    show: false,
                     createMarker: function(i, waypoint, n) {
                         // กำหนด Icon ตามตำแหน่ง
                         var markerIcon;
                         if (i === 0) {
-                            // จุดเริ่มต้น: รูปวงกลมสีเขียว (User)
+                            // จุดเริ่มต้น
                             markerIcon = L.divIcon({
                                 className: 'custom-pin-container',
                                 html: '<div class="pin-user"><i class="fa-solid fa-location-crosshairs"></i></div>',
@@ -103,7 +114,7 @@
                                 iconAnchor: [20, 20]
                             });
                         } else {
-                            // จุดปลายทาง: รูปวงกลมสีม่วง (Restroom)
+                            // จุดปลายทาง
                             markerIcon = L.divIcon({
                                 className: 'custom-pin-container',
                                 html: '<div class="pin-restroom"><i class="fa-solid fa-restroom"></i></div>',
@@ -115,7 +126,6 @@
                     }
                 }).addTo(map);
 
-                // ปรับหน้าจอให้เห็นทั้งสองจุดพอดี
                 control.on('routesfound', function(e) {
                     var routes = e.routes;
                     var bounds = L.latLngBounds([userLat, userLng], [destLat, destLng]);
@@ -125,7 +135,31 @@
             }, function() {
                 alert("กรุณาเปิด GPS และอนุญาตการเข้าถึงตำแหน่งเพื่อนำทาง");
             }, {
-                enableHighAccuracy: true // ใช้ GPS ความแม่นยำสูง
+                enableHighAccuracy: true 
+            });
+        }
+
+        // ระบบ Popup ฟีเจอร์ที่ยังไม่เปิดใช้งาน
+        const popup = document.getElementById('comingSoonPopup');
+        const closeBtn = document.getElementById('closePopupBtn');
+        const unavailableBtns = document.querySelectorAll('.unavailable-feature');
+
+        if(popup && closeBtn) { 
+            unavailableBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault(); 
+                    popup.classList.add('show');
+                });
+            });
+
+            closeBtn.addEventListener('click', function() {
+                popup.classList.remove('show');
+            });
+
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) {
+                    popup.classList.remove('show');
+                }
             });
         }
     </script>

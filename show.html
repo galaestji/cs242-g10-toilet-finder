@@ -45,8 +45,8 @@
                                     <i class="fa-solid fa-paper-plane"></i> นำทาง
                                 </button>
                             </a>
-                            <button class="btn-action"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
-                            <button class="btn-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                            <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
+                            <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
                         </div>
                     </div>
 
@@ -67,8 +67,8 @@
                                     <i class="fa-solid fa-paper-plane"></i> นำทาง
                                 </button>
                             </a>
-                            <button class="btn-action"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
-                            <button class="btn-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                            <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
+                            <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
                         </div>
                     </div>
 
@@ -89,8 +89,8 @@
                                     <i class="fa-solid fa-paper-plane"></i> นำทาง
                                 </button>
                             </a>
-                            <button class="btn-action"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
-                            <button class="btn-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                            <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
+                            <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
                         </div>
                     </div>
 
@@ -103,15 +103,24 @@
                 <div class="icon-wrapper"><i class="fa-solid fa-map"></i></div>
                 <span>ค้นหา</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item unavailable-feature">
                 <div class="icon-wrapper"><i class="fa-regular fa-bookmark"></i></div>
                 <span>รายการโปรด</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="#" class="nav-item unavailable-feature">
                 <div class="icon-wrapper"><i class="fa-solid fa-gear"></i></div>
                 <span>ตั้งค่า</span>
             </a>
         </nav>
+    </div>
+
+    <div id="comingSoonPopup" class="custom-popup-overlay">
+        <div class="custom-popup-box">
+            <i class="fa-solid fa-person-digging popup-icon"></i>
+            <h3>กำลังพัฒนา...</h3>
+            <p>ฟีเจอร์นี้ยังไม่เปิดให้บริการ</p>
+            <button class="btn-popup-close" id="closePopupBtn">ตกลง</button>
+        </div>
     </div>
 
     <script>
@@ -135,6 +144,28 @@
         L.marker([14.0722, 100.6053], {icon: customIcon}).addTo(map)
             .bindPopup('<b>ห้องน้ำ SC3</b><br>เปิดใช้งานอยู่')
             .openPopup();
+        
+        const popup = document.getElementById('comingSoonPopup');
+        const closeBtn = document.getElementById('closePopupBtn');
+        const unavailableBtns = document.querySelectorAll('.unavailable-feature');
+
+        
+        unavailableBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault(); 
+                popup.classList.add('show');
+            });
+        });
+
+        closeBtn.addEventListener('click', function() {
+            popup.classList.remove('show');
+        });
+
+        popup.addEventListener('click', function(e) {
+            if (e.target === popup) {
+                popup.classList.remove('show');
+            }
+        });
     </script>
 </body>
 </html>

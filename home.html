@@ -50,24 +50,29 @@
 
         <nav class="bottom-nav">
             <a href="#" class="nav-item active">
-                <div class="icon-wrapper">
-                    <i class="fa-solid fa-map"></i>
-                </div>
+                <div class="icon-wrapper"><i class="fa-solid fa-map"></i></div>
                 <span>ค้นหา</span>
             </a>
-            <a href="#" class="nav-item">
-                <div class="icon-wrapper">
-                    <i class="fa-regular fa-bookmark"></i>
-                </div>
+            
+            <a href="#" class="nav-item unavailable-feature">
+                <div class="icon-wrapper"><i class="fa-regular fa-bookmark"></i></div>
                 <span>รายการโปรด</span>
             </a>
-            <a href="#" class="nav-item">
-                <div class="icon-wrapper">
-                    <i class="fa-solid fa-gear"></i>
-                </div>
+            
+            <a href="#" class="nav-item unavailable-feature">
+                <div class="icon-wrapper"><i class="fa-solid fa-gear"></i></div>
                 <span>ตั้งค่า</span>
             </a>
         </nav>
+    </div>
+
+    <div id="comingSoonPopup" class="custom-popup-overlay">
+        <div class="custom-popup-box">
+            <i class="fa-solid fa-person-digging popup-icon"></i>
+            <h3>กำลังพัฒนา...</h3>
+            <p>ฟีเจอร์นี้ยังไม่เปิดให้บริการ</p>
+            <button class="btn-popup-close" id="closePopupBtn">ตกลง</button>
+        </div>
     </div>
 </body>
 
@@ -94,5 +99,29 @@
             goToSearch();
         }
     });
+
+    // ระบบ Popup ฟีเจอร์ที่ยังไม่เปิดใช้งาน
+        const popup = document.getElementById('comingSoonPopup');
+        const closeBtn = document.getElementById('closePopupBtn');
+        const unavailableBtns = document.querySelectorAll('.unavailable-feature');
+
+        if(popup && closeBtn) { 
+            unavailableBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault(); 
+                    popup.classList.add('show');
+                });
+            });
+
+            closeBtn.addEventListener('click', function() {
+                popup.classList.remove('show');
+            });
+
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) {
+                    popup.classList.remove('show');
+                }
+            });
+        }
 </script>
 </html>

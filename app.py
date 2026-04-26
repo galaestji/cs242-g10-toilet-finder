@@ -60,9 +60,8 @@ def get_nearest():
                 "lon": toilet.location.longitude,
                 "image_filename": toilet.image_filename or "photo/hongnum.png",
                 "distance_km": round(distance, 4),
-                "map_link": f"https://www.google.com/maps?q={toilet.location.latitude},{toilet.location.longitude}"
+                "map_link": f"https://www.google.com/maps/dir/?api=1&origin={lat},{lon}&destination={toilet.location.latitude},{toilet.location.longitude}&travelmode=walking"
             })
-
         return jsonify(result)
 
     except sqlite3.Error as db_error:

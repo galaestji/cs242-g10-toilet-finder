@@ -2,11 +2,12 @@ import math
 
 
 class Toilet:
-    def __init__(self, name: str, floor: int, info: str, location):
+    def __init__(self, name: str, floor: int, info: str, location, image_filename: str = None):
         self.name = name
         self.floor = floor
         self.info = info
         self.location = location
+        self.image_filename = image_filename
 
     def get_info(self) -> str:
         return self.info

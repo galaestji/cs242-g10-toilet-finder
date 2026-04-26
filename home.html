@@ -39,7 +39,7 @@
             <div class="search-section">
                 <div class="search-input-box">
                     <i class="fa-solid fa-location-dot location-icon"></i>
-                    <input type="text" id="user-location" placeholder="กรอกตำแหน่งปัจจุบันของคุณ" value="กรอกตำแหน่งปัจจุบันของคุณ">
+                    <input type="text" id="user-location" placeholder="กดค้นหาเพื่อใช้ตำแหน่งปัจจุบัน" value="" readonly>
                 </div>
                 
                 <button class="btn-search" id="search-btn">
@@ -80,25 +80,43 @@
     const searchBtn = document.getElementById('search-btn');
     const locationInput = document.getElementById('user-location');
 
-        function goToSearch() {
-        const locationValue = locationInput.value.trim();
-            
-        if (locationValue === "") {
-            alert("กรุณากรอกตำแหน่งก่อนค้นหาครับ");
+    function goToSearch() {
+        if (!navigator.geolocation) {
+            alert('เบราว์เซอร์ของคุณไม่รองรับ GPS กรุณาใช้บนมือถือหรือเบราว์เซอร์ที่รองรับ');
             return;
         }
 
-        window.location.href = `show.html?start=${encodeURIComponent(locationValue)}`;
+        locationInput.value = 'กำลังค้นหาตำแหน่ง...';
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude.toFixed(6);
+            const lon = position.coords.longitude.toFixed(6);
+            locationInput.value = `${lat}, ${lon}`;
+            window.location.href = `show.html?start=${encodeURIComponent(lat + ', ' + lon)}`;
+        }, function(error) {
+            let message = '';
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'กรุณาอนุญาตให้เข้าถึง GPS เพื่อค้นหาห้องน้ำใกล้คุณ';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'ไม่สามารถรับตำแหน่ง GPS ได้ กรุณาลองใหม่';
+                    break;
+                case error.TIMEOUT:
+                    message = 'ขอเวลาหาพิกัดนานเกินไป กรุณาลองใหม่';
+                    break;
+                default:
+                    message = 'เกิดข้อผิดพลาดในการอ่านตำแหน่ง GPS';
+            }
+            alert(message);
+            locationInput.value = '';
+        }, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        });
     }
 
-    
     searchBtn.addEventListener('click', goToSearch);
-
-    locationInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            goToSearch();
-        }
-    });
 
     // ระบบ Popup ฟีเจอร์ที่ยังไม่เปิดใช้งาน
         const popup = document.getElementById('comingSoonPopup');

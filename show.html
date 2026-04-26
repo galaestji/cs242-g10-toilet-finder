@@ -23,77 +23,12 @@
             <div class="bottom-sheet">
                 <div class="drag-handle"></div>
                 
-                <div class="cards-scroll">
-                    
+                <div class="cards-scroll" id="toilet-cards">
                     <div class="toilet-card">
-                        <img src="photo/hongnum.png" alt="ห้องน้ำ SC3" class="card-img">
-                        <h3 class="card-title">ห้องน้ำ SC3 ชั้น 1</h3>
-                        
                         <div class="card-status-row">
-                            <span><span class="status-open">Open</span> <span class="status-time">• Closes 20:00</span></span>
-                            <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.9 (67)</span>
-                        </div>
-                        
-                        <div class="card-meta-row">
-                            <span class="meta-item"><i class="fa-solid fa-location-dot"></i> 250 เมตร</span>
-                            <span class="meta-item"><i class="fa-regular fa-clock"></i> 5 นาที</span>
-                        </div>
-                        
-                        <div class="card-actions">
-                            <a href="routing.html" style="text-decoration: none; flex: 1.5;">
-                                <button class="btn-nav" style="width: 100%;">
-                                    <i class="fa-solid fa-paper-plane"></i> นำทาง
-                                </button>
-                            </a>
-                            <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
-                            <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                            <span>กำลังโหลดผลลัพธ์...</span>
                         </div>
                     </div>
-
-                    <div class="toilet-card">
-                        <img src="photo/hongnum.png" alt="ห้องน้ำ SC3" class="card-img">
-                        <h3 class="card-title">ห้องน้ำ SC3 ชั้น 2</h3>
-                        <div class="card-status-row">
-                            <span><span class="status-open">Open</span> <span class="status-time">• Closes 20:00</span></span>
-                            <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.8 (45)</span>
-                        </div>
-                        <div class="card-meta-row">
-                            <span class="meta-item"><i class="fa-solid fa-location-dot"></i> 250 เมตร</span>
-                            <span class="meta-item"><i class="fa-regular fa-clock"></i> 5 นาที</span>
-                        </div>
-                        <div class="card-actions">
-                            <a href="routing.html" style="text-decoration: none; flex: 1.5;">
-                                <button class="btn-nav" style="width: 100%;">
-                                    <i class="fa-solid fa-paper-plane"></i> นำทาง
-                                </button>
-                            </a>
-                            <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
-                            <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
-                        </div>
-                    </div>
-
-                    <div class="toilet-card">
-                        <img src="photo/hongnum.png" alt="ห้องน้ำ SC3" class="card-img">
-                        <h3 class="card-title">ห้องน้ำ SC3 ชั้น 3</h3>
-                        <div class="card-status-row">
-                            <span><span class="status-open">Open</span> <span class="status-time">• Closes 20:00</span></span>
-                            <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.7 (32)</span>
-                        </div>
-                        <div class="card-meta-row">
-                            <span class="meta-item"><i class="fa-solid fa-location-dot"></i> 250 เมตร</span>
-                            <span class="meta-item"><i class="fa-regular fa-clock"></i> 5 นาที</span>
-                        </div>
-                        <div class="card-actions">
-                            <a href="routing.html" style="text-decoration: none; flex: 1.5;">
-                                <button class="btn-nav" style="width: 100%;">
-                                    <i class="fa-solid fa-paper-plane"></i> นำทาง
-                                </button>
-                            </a>
-                            <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
-                            <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </main>
@@ -124,8 +59,8 @@
     </div>
 
     <script>
-        var map = L.map('map', {
-            zoomControl: false 
+        const map = L.map('map', {
+            zoomControl: false
         }).setView([14.0722, 100.6053], 15);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -133,28 +68,142 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        var customIcon = L.divIcon({
+        const customIcon = L.divIcon({
             className: 'custom-map-pin',
-            html: '<i class="fa-solid fa-location-dot"></i>', 
-            iconSize: [30, 42],   
+            html: '<i class="fa-solid fa-location-dot"></i>',
+            iconSize: [30, 42],
             iconAnchor: [15, 42],
             popupAnchor: [0, -40]
         });
 
-        L.marker([14.0722, 100.6053], {icon: customIcon}).addTo(map)
-            .bindPopup('<b>ห้องน้ำ SC3</b><br>เปิดใช้งานอยู่')
-            .openPopup();
-        
+        let userMarker = null;
+        let toiletMarkers = [];
+
+        function parseLatLon(input) {
+            const parts = input.split(',').map(part => part.trim());
+            if (parts.length !== 2) return null;
+            const lat = parseFloat(parts[0]);
+            const lon = parseFloat(parts[1]);
+            if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+            return { lat, lon };
+        }
+
+        function showError(message) {
+            const toiletCards = document.getElementById('toilet-cards');
+            toiletCards.innerHTML = `<div class="toilet-card"><div class="card-status-row"><span>${message}</span></div></div>`;
+            alert(message);
+        }
+
+        function setMapMarkers(userCoords, toilets) {
+            if (userMarker) {
+                map.removeLayer(userMarker);
+            }
+            toiletMarkers.forEach(marker => map.removeLayer(marker));
+            toiletMarkers = [];
+
+            userMarker = L.marker([userCoords.lat, userCoords.lon], { icon: customIcon })
+                .addTo(map)
+                .bindPopup('ตำแหน่งของคุณ');
+
+            const bounds = [[userCoords.lat, userCoords.lon]];
+            toilets.forEach(toilet => {
+                const marker = L.marker([toilet.lat, toilet.lon], { icon: customIcon })
+                    .addTo(map)
+                    .bindPopup(`${toilet.name}<br>${Math.round(toilet.distance_km * 1000)} เมตร`);
+                toiletMarkers.push(marker);
+                bounds.push([toilet.lat, toilet.lon]);
+            });
+
+            if (bounds.length > 1) {
+                map.fitBounds(bounds, { padding: [80, 80] });
+            }
+        }
+
+        function createToiletCard(toilet) {
+            const card = document.createElement('div');
+            card.className = 'toilet-card';
+            const imageUrl = toilet.image_filename || 'photo/hongnum.png';
+            card.innerHTML = `
+                <img src="${imageUrl}" alt="${toilet.name}" class="card-img">
+                <h3 class="card-title">${toilet.name}</h3>
+                <div class="card-status-row">
+                    <span><span class="status-open">Open</span> <span class="status-time">• ${toilet.info || 'ไม่มีข้อมูลเพิ่มเติม'}</span></span>
+                    <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.8 (30)</span>
+                </div>
+                <div class="card-meta-row">
+                    <span class="meta-item"><i class="fa-solid fa-location-dot"></i> ${Math.round(toilet.distance_km * 1000)} เมตร</span>
+                    <span class="meta-item"><i class="fa-regular fa-clock"></i> ประมาณ ${Math.max(Math.round(toilet.distance_km * 12), 1)} นาที</span>
+                </div>
+                <div class="card-actions">
+                    <a href="routing.html?lat=${toilet.lat}&lon=${toilet.lon}&name=${encodeURIComponent(toilet.name)}&distance=${Math.round(toilet.distance_km * 1000)}&duration=${Math.max(Math.round(toilet.distance_km * 12), 1)}&label=${encodeURIComponent(toilet.info || '')}" style="text-decoration: none; flex: 1.5;">
+                        <button class="btn-nav" style="width: 100%;">
+                            <i class="fa-solid fa-paper-plane"></i> นำทาง
+                        </button>
+                    </a>
+                    <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
+                    <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
+                </div>
+            `;
+            return card;
+        }
+
+        function loadNearestToilets() {
+            const params = new URLSearchParams(window.location.search);
+            const start = params.get('start');
+
+            if (!start) {
+                showError('ไม่มีตำแหน่งเริ่มต้น กรุณากลับไปกรอกตำแหน่งที่หน้าแรก');
+                return;
+            }
+
+            const coords = parseLatLon(start);
+            if (!coords) {
+                showError('รูปแบบตำแหน่งไม่ถูกต้อง กรุณาใช้รูปแบบ lat, lon');
+                return;
+            }
+
+            fetch('/api/nearest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lat: coords.lat, lon: coords.lon })
+            })
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || 'ไม่สามารถเรียกข้อมูลได้');
+                    }
+                    return data;
+                })
+                .then(toilets => {
+                    const toiletCards = document.getElementById('toilet-cards');
+                    toiletCards.innerHTML = '';
+
+                    if (!Array.isArray(toilets) || toilets.length === 0) {
+                        showError('ไม่พบข้อมูลห้องน้ำใกล้เคียง');
+                        return;
+                    }
+
+                    toilets.forEach(toilet => {
+                        toiletCards.appendChild(createToiletCard(toilet));
+                    });
+                    setMapMarkers(coords, toilets);
+                })
+                .catch(error => {
+                    console.error(error);
+                    showError(error.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+                });
+        }
+
+        loadNearestToilets();
+
         const popup = document.getElementById('comingSoonPopup');
         const closeBtn = document.getElementById('closePopupBtn');
-        const unavailableBtns = document.querySelectorAll('.unavailable-feature');
 
-        
-        unavailableBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault(); 
-                popup.classList.add('show');
-            });
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('.unavailable-feature');
+            if (!target) return;
+            e.preventDefault();
+            popup.classList.add('show');
         });
 
         closeBtn.addEventListener('click', function() {

@@ -60,7 +60,7 @@ def get_nearest():
                 "lon": toilet.location.longitude,
                 "image_filename": toilet.image_filename or "photo/hongnum.png",
                 "distance_km": round(distance, 4),
-                "map_link": f"https://www.google.com/maps/dir/?api=1&origin={lat},{lon}&destination={toilet.location.latitude},{toilet.location.longitude}&travelmode=walking"
+                "map_link": f"routing.html?lat={toilet.location.latitude}&lon={toilet.location.longitude}&name={toilet.name}&distance={round(distance * 1000)}&duration={max(round(distance * 12), 1)}&label={toilet.info or ''}"
             })
         return jsonify(result)
 

@@ -16,7 +16,7 @@
         </header>
 
         <main class="main-content">
-            <div class="status-container">
+            <div class="status-container" id="location-status" style="display: none; width: fit-content; margin-left: auto; margin-right: 15%; transform: translateX(35%); margin-bottom: -15px;">
                 <div class="status-badge">
                     <div class="status-dot"></div>
                     <span>เปิดตำแหน่งแล้ว</span>
@@ -77,6 +77,25 @@
 </body>
 
 <script>
+    const locationStatusBadge = document.getElementById('location-status')
+    if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
+            if (result.state === 'granted') {
+                locationStatusBadge.style.display = 'block';
+            } else {
+                locationStatusBadge.style.display = 'none';
+            }
+
+            result.onchange = function() {
+                if (this.state === 'granted') {
+                    locationStatusBadge.style.display = 'block';
+                } else {
+                    locationStatusBadge.style.display = 'none';
+                }
+            };
+        });
+    }
+
     const searchBtn = document.getElementById('search-btn');
     const locationInput = document.getElementById('user-location');
 

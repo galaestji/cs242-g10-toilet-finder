@@ -72,6 +72,26 @@
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     
     <script>
+        var style = document.createElement('style');
+        style.innerHTML = `
+            .info-title {
+                white-space: normal !important;
+                word-wrap: break-word !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                line-height: 1.3;
+            }
+            .info-details {
+                flex: 1;
+                overflow: visible !important;
+            }
+            .floating-info-card {
+                height: auto !important;
+                padding-bottom: 15px; 
+            }
+        `;
+
+        document.head.appendChild(style);
         // 1. ตั้งค่าแผนที่เริ่มต้น
         var map = L.map('map', { zoomControl: false }).setView([14.0722, 100.6053], 15);
         
@@ -87,15 +107,18 @@
         var destLabel = params.get('label') || '';
         var cardDistance = parseInt(params.get('distance'), 10);
         var cardDuration = parseInt(params.get('duration'), 10);
+        
         document.getElementById('target-name').textContent = destName;
-        document.getElementById('info-address').textContent = destLabel || `พิกัดปลายทาง: ${destLat.toFixed(6)}, ${destLng.toFixed(6)}`;
+        document.getElementById('info-address').textContent = destLabel || '';
 
-        if (!Number.isNaN(cardDistance) && cardDistance > 0) {
-            var initialDist = cardDistance >= 1000 ? (cardDistance / 1000).toFixed(1) + ' กม.' : cardDistance + ' เมตร';
-            document.querySelector('.meta-dist').textContent = initialDist;
+        var metaDist = document.querySelector('.meta-dist');
+        var metaTime = document.querySelector('.meta-time');
+
+        if (!Number.isNaN(cardDistance) && cardDistance > 0 && metaDist) {
+            metaDist.textContent = cardDistance + ' เมตร';
         }
-        if (!Number.isNaN(cardDuration) && cardDuration > 0) {
-            document.querySelector('.meta-time').innerHTML = '<i class="fa-regular fa-clock"></i> ' + cardDuration + ' นาที';
+        if (!Number.isNaN(cardDuration) && cardDuration > 0 && metaTime) {
+            metaTime.innerHTML = '<i class="fa-regular fa-clock"></i> ' + cardDuration + ' นาที';
         }
 
         // 3. ฟังก์ชันดึงตำแหน่งปัจจุบัน (GPS จริง)
@@ -107,14 +130,16 @@
                 // 4. สร้างระบบนำทาง
                 var control = L.Routing.control({
                     router: L.Routing.osrmv1({ 
-                        serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1' 
+                        serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1',
+                        profile: 'foot',
+                        useHints: false
                     }),
                     waypoints: [
                         L.latLng(userLat, userLng), // ตำแหน่งปัจจุบันของคุณ
                         L.latLng(destLat, destLng)  // ห้องน้ำปลายทาง
                     ],
                     lineOptions: {
-                        styles: [{ color: '#007BFF', weight: 7, opacity: 0.8 }]
+                        styles: [{ color: '#FF7043', weight: 6, opacity: 0.8 }]
                     },
                     addWaypoints: false,
                     routeWhileDragging: false,
@@ -122,42 +147,31 @@
                     show: false,
                     createMarker: function(i, waypoint, n) {
                         // กำหนด Icon ตามตำแหน่ง
-                        var markerIcon;
+                        var iconHtml = '';
                         if (i === 0) {
                             // จุดเริ่มต้น
-                            markerIcon = L.divIcon({
-                                className: 'custom-pin-container',
-                                html: '<div class="pin-user"><i class="fa-solid fa-location-crosshairs"></i></div>',
-                                iconSize: [40, 40],
-                                iconAnchor: [20, 20]
-                            });
+                            iconHtml = '<i class="fa-solid fa-location-dot" style="color: #DC3545; text-shadow: 0 0 2px rgba(0,0,0,0.3);"></i>';
                         } else {
                             // จุดปลายทาง
-                            markerIcon = L.divIcon({
-                                className: 'custom-pin-container',
-                                html: '<div class="pin-restroom"><i class="fa-solid fa-restroom"></i></div>',
-                                iconSize: [40, 40],
-                                iconAnchor: [20, 20]
-                            });
+                            iconHtml = '<i class="fa-solid fa-location-dot" style="color: #0056B3; text-shadow: 0 0 2px rgba(0,0,0,0.3);"></i>'
                         }
+
+                        var markerIcon = L.divIcon({
+                            className: 'custom-map-pin',
+                            html: iconHtml,
+                            iconSize: [30, 42],
+                            iconAnchor: [15, 42]
+                        });
+                        
                         return L.marker(waypoint.latLng, { icon: markerIcon });
                     }
                 }).addTo(map);
 
                 function updateRouteInfo(route) {
-                    if (!route || !route.summary) return;
-                    var distanceMeters = route.summary.totalDistance || route.summary.total_distance || 0;
-                    var timeSeconds = route.summary.totalTime || route.summary.total_time || 0;
-                    var distanceText = distanceMeters >= 1000
-                        ? (distanceMeters / 1000).toFixed(1) + ' กม.'
-                        : Math.round(distanceMeters) + ' เมตร';
-                    var durationMinutes = Math.round(timeSeconds / 60);
-                    var durationText = durationMinutes > 0 ? durationMinutes + ' นาที' : '1 นาที';
-
-                    var metaDist = document.querySelector('.meta-dist');
-                    var metaTime = document.querySelector('.meta-time');
-                    if (metaDist) metaDist.textContent = distanceText;
-                    if (metaTime) metaTime.innerHTML = '<i class="fa-regular fa-clock"></i> ' + durationText;
+                    if (!Number.isNaN(cardDistance) && cardDistance > 0) {
+                        if (metaDist) metaDist.textContent = cardDistance + ' เมตร';
+                        if (metaTime) metaTime.innerHTML = '<i class="fa-regular fa-clock"></i> ' + cardDuration + ' นาที';
+                    }
                 }
 
                 control.on('routesfound', function(e) {

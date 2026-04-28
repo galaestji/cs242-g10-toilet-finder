@@ -182,13 +182,15 @@
 
                         const distFormatted = realDist >= 1000 ? (realDist / 1000).toFixed(1) + ' กม.' : Math.round(realDist) + ' เมตร';
                         
-                        distSpan.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${realDist} เมตร`;
+                        distSpan.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${fallbackDist} เมตร`;
                         timeSpan.innerHTML = `<i class="fa-regular fa-clock"></i> ประมาณ ${realTime} นาที`;
 
                         navLink.href = `routing.html?lat=${toilet.lat}&lon=${toilet.lon}&name=${encodeURIComponent(toilet.name)}&distance=${realDist}&duration=${realTime}&label=${encodeURIComponent(toilet.info || '')}`;
                         
-                        if (toiletMarkers[index]) {
-                            toiletMarkers[index].getPopup().setContent(`${toilet.name}<br>${realDist} เมตร`);
+                        navLink.href = `routing.html?lat=${toilet.lat}&lon=${toilet.lon}&name=${encodeURIComponent(toilet.name)}&distance=${fallbackDist}&duration=${realTime}&label=${encodeURIComponent(toilet.info || '')}`;
+                        
+                        if (typeof index !== 'undefined' && toiletMarkers[index]) {
+                            toiletMarkers[index].getPopup().setContent(`${toilet.name}<br>${fallbackDist} เมตร`);
                         }
                     }
                 })

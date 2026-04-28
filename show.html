@@ -68,13 +68,6 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        const customIcon = L.divIcon({
-            className: 'custom-map-pin',
-            html: '<i class="fa-solid fa-location-dot"></i>',
-            iconSize: [30, 42],
-            iconAnchor: [15, 42],
-            popupAnchor: [0, -40]
-        });
 
         let userMarker = null;
         let toiletMarkers = [];
@@ -95,28 +88,52 @@
         }
 
         function setMapMarkers(userCoords, toilets) {
-            if (userMarker) {
-                map.removeLayer(userMarker);
-            }
+            if (userMarker) map.removeLayer(userMarker);
             toiletMarkers.forEach(marker => map.removeLayer(marker));
             toiletMarkers = [];
 
-            userMarker = L.marker([userCoords.lat, userCoords.lon], { icon: customIcon })
-                .addTo(map)
-                .bindPopup('ตำแหน่งของคุณ');
+            const userIcon = L.divIcon({
+                className: 'custom-map-pin',
+                html: '<i class="fa-solid fa-location-dot" style="color: #DC3545; text-shadow: 0 0 2px rgba(0,0,0,0.3);"></i>', 
+                iconSize: [30, 42],
+                iconAnchor: [15, 42],
+                popupAnchor: [0, -40]
+            });
 
+            const toiletIcon = L.divIcon({
+                className: 'custom-map-pin',
+                html: '<i class="fa-solid fa-location-dot" style="color: #0056B3; text-shadow: 0 0 2px rgba(0,0,0,0.3);"></i>', 
+                iconSize: [30, 42],
+                iconAnchor: [15, 42],
+                popupAnchor: [0, -40]
+            });
+
+            userMarker = L.marker([userCoords.lat, userCoords.lon], { icon: userIcon })
+                .addTo(map)
+                .bindPopup('ตำแหน่งของคุณ')
+                .openPopup();
+                
             const bounds = [[userCoords.lat, userCoords.lon]];
             toilets.forEach(toilet => {
-                const marker = L.marker([toilet.lat, toilet.lon], { icon: customIcon })
+                const fallbackDist = Math.round(toilet.distance_km * 1000);
+                const marker = L.marker([toilet.lat, toilet.lon], { icon: toiletIcon })
                     .addTo(map)
-                    .bindPopup(`${toilet.name}<br>${Math.round(toilet.distance_km * 1000)} เมตร`);
+                    .bindPopup(`${toilet.name}<br>${fallbackDist} เมตร`)
                 toiletMarkers.push(marker);
                 bounds.push([toilet.lat, toilet.lon]);
             });
 
-            if (bounds.length > 1) {
-                map.fitBounds(bounds, { padding: [80, 80] });
-            }
+            map.fitBounds(
+                [
+                    [userCoords.lat, userCoords.lon], 
+                    [userCoords.lat, userCoords.lon]
+                ], 
+                {
+                    paddingTopLeft: [0, 0],
+                    paddingBottomRight: [0, 450],
+                    maxZoom: 17
+                }
+            );
         }
 
         function createToiletCard(toilet, userCoords) {
@@ -124,7 +141,6 @@
             card.className = 'toilet-card';
             const imageUrl = toilet.image_filename || 'photo/hongnum.png';
             
-            // ค่าสำรองกรณีเน็ตช้าหรือโหลด OSRM ไม่ได้
             const fallbackDist = Math.round(toilet.distance_km * 1000);
             const fallbackTime = Math.max(Math.round(toilet.distance_km * 12), 1);
 
@@ -166,14 +182,23 @@
 
                         const distFormatted = realDist >= 1000 ? (realDist / 1000).toFixed(1) + ' กม.' : Math.round(realDist) + ' เมตร';
                         
-                        distSpan.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${distFormatted}`;
+                        distSpan.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${realDist} เมตร`;
                         timeSpan.innerHTML = `<i class="fa-regular fa-clock"></i> ประมาณ ${realTime} นาที`;
 
-                        navLink.href = `routing.html?lat=${toilet.lat}&lon=${toilet.lon}&name=${encodeURIComponent(toilet.name)}&distance=${Math.round(realDist)}&duration=${realTime}&label=${encodeURIComponent(toilet.info || '')}`;
+                        navLink.href = `routing.html?lat=${toilet.lat}&lon=${toilet.lon}&name=${encodeURIComponent(toilet.name)}&distance=${realDist}&duration=${realTime}&label=${encodeURIComponent(toilet.info || '')}`;
+                        
+                        if (toiletMarkers[index]) {
+                            toiletMarkers[index].getPopup().setContent(`${toilet.name}<br>${realDist} เมตร`);
+                        }
                     }
                 })
                 .catch(err => {
                     console.error("OSRM Error:", err);
+                    distSpan.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${fallbackDist} เมตร`;
+                    timeSpan.innerHTML = `<i class="fa-regular fa-clock"></i> ประมาณ ${fallbackTime} นาที`;
+                    if (toiletMarkers[index]) {
+                        toiletMarkers[index].getPopup().setContent(`${toilet.name}<br>${fallbackDist} เมตร`);
+                    }
                 });
 
             return card;
@@ -206,6 +231,7 @@
                     }
                     return data;
                 })
+
                 .then(toilets => {
                     const toiletCards = document.getElementById('toilet-cards');
                     toiletCards.innerHTML = '';
@@ -215,11 +241,12 @@
                         return;
                     }
 
-                    toilets.forEach(toilet => {
-                        toiletCards.appendChild(createToiletCard(toilet, coords));
-                    });
                     setMapMarkers(coords, toilets);
+                    toilets.forEach((toilet, index) => {
+                        toiletCards.appendChild(createToiletCard(toilet, coords, index));
+                    });
                 })
+
                 .catch(error => {
                     console.error(error);
                     showError(error.message || 'เกิดข้อผิดพลาดในการโหลดข้อมูล');

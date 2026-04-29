@@ -182,8 +182,9 @@
                         </button>
                     </a>
                     <button class="btn-action unavailable-feature"><i class="fa-regular fa-bookmark"></i> บันทึก</button>
-                    <button class="btn-action unavailable-feature"><i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์</button>
-                </div>
+                    <button class="btn-action" onclick="shareToGoogleMaps(${toilet.lat}, ${toilet.lon}, '${toilet.name}')">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i> แชร์
+                    </button>                
             `;
 
             const distSpan = card.querySelector('.dist-text');
@@ -394,6 +395,23 @@
             document.getElementById('reviewPopup').classList.remove('show');
             if (redirectAfterReview) {
                 window.location.href = 'home.html';
+            }
+        }
+
+        // ฟังก์ชันแชร์ตำแหน่งห้องน้ำไป Google Maps
+        function shareToGoogleMaps(lat, lon, name) {
+            const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=$${lat},${lon}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'แชร์ตำแหน่งห้องน้ำจาก Jood Jood',
+                    text: `เจอห้องน้ำที่ "${name}" แวะมาดูพิกัดบน Google Maps ได้เลย:`,
+                    url: googleMapsUrl,
+                })
+                .then(() => console.log('แชร์สำเร็จ'))
+                .catch((error) => console.log('การแชร์ล้มเหลว', error));
+            } else {
+                window.open(googleMapsUrl, '_blank');
             }
         }
     </script>

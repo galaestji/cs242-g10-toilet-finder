@@ -58,6 +58,23 @@
         </div>
     </div>
 
+    <div id="reviewPopup" class="custom-popup-overlay">
+        <div class="custom-popup-box" style="position: relative;">
+            <i class="fa-solid fa-xmark close-icon-x" id="closeReviewBtn"></i>
+            <h3 id="reviewTitle">รีวิวห้องน้ำ</h3>
+            <div class="star-rating-box" id="starContainer">
+                <i class="fa-solid fa-star" data-rating="1"></i>
+                <i class="fa-solid fa-star" data-rating="2"></i>
+                <i class="fa-solid fa-star" data-rating="3"></i>
+                <i class="fa-solid fa-star" data-rating="4"></i>
+                <i class="fa-solid fa-star" data-rating="5"></i>
+            </div>
+            <p id="reviewStatus" class="review-status-text">แตะที่ดาวเพื่อให้คะแนน</p>
+            <button class="btn-submit-review" id="saveReviewBtn">บันทึกรีวิว</button>
+            
+            </div>
+    </div>
+
     <script>
         const map = L.map('map', {
             zoomControl: false
@@ -148,8 +165,10 @@
                 <img src="${imageUrl}" alt="${toilet.name}" class="card-img">
                 <h3 class="card-title">${toilet.name}</h3>
                 <div class="card-status-row">
-                    <span><span class="status-open">Open</span> <span class="status-time">• ${toilet.info || 'ไม่มีข้อมูลเพิ่มเติม'}</span></span>
-                    <span class="card-rating"><i class="fa-solid fa-star rating-star"></i> 4.8 (30)</span>
+                    <span><span class="status-open">Open</span> <span class="status-time">${toilet.info ? ' • ' + toilet.info : ''}</span></span>
+                    <span class="card-rating" style="cursor: pointer; transition: 0.2s;" onclick="openReviewModal('${toilet.name}')" title="แตะเพื่อให้คะแนน">
+                        <i class="fa-solid fa-star" style="color: #FFC107;"></i> ${Number(toilet.average_rating || 0).toFixed(1)} (${toilet.review_count || 0})
+                    </span>
                 </div>
                 <div class="card-meta-row">
                     <span class="meta-item dist-text"><i class="fa-solid fa-location-dot"></i> ${fallbackDist} เมตร</span>
@@ -276,6 +295,107 @@
                 popup.classList.remove('show');
             }
         });
+
+        // ระบบรีวิวห้องน้ำ
+        let currentReviewToilet = "";
+        let currentRating = 0;
+        let redirectAfterReview = false;
+
+        function openReviewModal(toiletName, isFromRouting = false) {
+            currentReviewToilet = toiletName;
+            redirectAfterReview = isFromRouting;
+            document.getElementById('reviewTitle').textContent = `รีวิว: ${toiletName}`;
+            
+            // เช็คว่าเคยรีวิวหรือยัง
+            const savedRating = localStorage.getItem(`review_${toiletName}`);
+            const statusText = document.getElementById('reviewStatus');
+
+            if (savedRating) {
+                currentRating = parseInt(savedRating);
+                statusText.textContent = "คุณเคยรีวิวแล้ว (สามารถแก้ไขได้)";
+            } else {
+                currentRating = 0;
+                statusText.textContent = "แตะที่ดาวเพื่อให้คะแนน";
+            }
+            
+            updateStarsUI(currentRating);
+            document.getElementById('reviewPopup').classList.add('show');
+        }
+
+        function updateStarsUI(rating) {
+            const stars = document.querySelectorAll('#starContainer i');
+            stars.forEach(star => {
+                if (parseInt(star.dataset.rating) <= rating) {
+                    star.classList.add('star-active');
+                } else {
+                    star.classList.remove('star-active');
+                }
+            });
+        }
+
+        // จัดการเมื่อกดดาว
+        document.querySelectorAll('#starContainer i').forEach(star => {
+            star.addEventListener('click', function() {
+                currentRating = parseInt(this.dataset.rating);
+                updateStarsUI(currentRating);
+                document.getElementById('reviewStatus').textContent = `คุณให้คะแนน ${currentRating} ดาว`;
+            });
+        });
+
+        // จัดการปุ่มบันทึก
+        document.getElementById('saveReviewBtn').addEventListener('click', function() {
+            if (currentRating > 0) {
+                // 1. ส่งข้อมูลไปหา Python Backend
+                fetch('/api/add_review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: currentReviewToilet.trim(), // ใส่ trim() กันช่องว่างส่วนเกิน
+                        rating: currentRating
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        // 2. ถ้าเซฟสำเร็จ ก็เซฟไว้ในเครื่องด้วยเพื่อจำว่าเคยให้กี่ดาว (เอาไว้แก้ไข)
+                        localStorage.setItem(`review_${currentReviewToilet}`, currentRating);
+                        
+                        alert('ขอบคุณสำหรับรีวิวค่ะ!');
+                        closeReviewModal();
+                        
+                        // 3. หลอกเบราว์เซอร์ให้ดึงข้อมูลใหม่ (แก้ปัญหา Cache)
+                        const params = new URLSearchParams(window.location.search);
+                        const start = params.get('start');
+                        if(start) {
+                           window.location.href = window.location.pathname + '?start=' + start + '&_t=' + new Date().getTime();
+                        } else {
+                           location.reload(true);
+                        }
+                    } else {
+                        alert('เกิดข้อผิดพลาด: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+                });
+
+            } else {
+                alert('กรุณาเลือกดาวก่อนบันทึกค่ะ');
+            }
+        });
+
+        // จัดการปุ่มปิด
+        document.getElementById('closeReviewBtn').addEventListener('click', closeReviewModal);
+
+        function closeReviewModal() {
+            document.getElementById('reviewPopup').classList.remove('show');
+            if (redirectAfterReview) {
+                window.location.href = 'home.html';
+            }
+        }
     </script>
 </body>
 </html>

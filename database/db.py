@@ -21,7 +21,9 @@ def init_db():
             latitude REAL NOT NULL,
             longitude REAL NOT NULL,
             building_name TEXT,
-            is_disabled INTEGER NOT NULL DEFAULT 0     
+            is_disabled INTEGER NOT NULL DEFAULT 0,
+            total_stars INTEGER NOT NULL DEFAULT 0,
+            review_count INTEGER NOT NULL DEFAULT 0
         )
     """)
 
@@ -40,6 +42,10 @@ def init_db():
     if "is_disabled" not in columns:
         cursor.execute("ALTER TABLE toilets ADD COLUMN is_disabled INTEGER NOT NULL DEFAULT 0")
 
+    if "total_stars" not in columns:
+        cursor.execute("ALTER TABLE toilets ADD COLUMN total_stars INTEGER NOT NULL DEFAULT 0")
+        cursor.execute("ALTER TABLE toilets ADD COLUMN review_count INTEGER NOT NULL DEFAULT 0")
+
     conn.commit()
     conn.close()
 
@@ -49,6 +55,7 @@ def get_all_toilets_from_db():
     cursor = conn.cursor()
     cursor.execute("""
         SELECT t.id, t.name, t.floor, t.info, t.latitude, t.longitude, t.building_name,
+                t.total_stars, t.review_count,
                (SELECT image_filename FROM toilet_images WHERE toilet_id = t.id LIMIT 1) AS image_filename
         FROM toilets t
     """)
@@ -57,9 +64,9 @@ def get_all_toilets_from_db():
     
     toilets = []
     for row in rows:
-        _, name, floor, info, lat, lon, bldg, image_filename = row
+        _, name, floor, info, lat, lon, bldg, total_stars, review_count, image_filename = row
         location = Location(latitude=lat, longitude=lon, building_name=bldg)
-        toilets.append(Toilet(name=name, floor=floor, info=info, location=location, image_filename=image_filename))
+        toilets.append(Toilet(name=name, floor=floor, info=info, location=location, image_filename=image_filename, total_stars=total_stars, review_count=review_count))
         
     return toilets
 

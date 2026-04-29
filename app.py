@@ -5,7 +5,7 @@ from models.location import Location
 from models.toilet import Toilet
 from models.user import User
 from services.toilet_finder import ToiletFinder
-from database.db import init_db, get_all_toilets_from_db, seed_real_data
+from database.db import init_db, get_all_toilets_from_db, seed_real_data, get_connection
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 
@@ -60,6 +60,8 @@ def get_nearest():
                 "lon": toilet.location.longitude,
                 "image_filename": toilet.image_filename or "photo/hongnum.png",
                 "distance_km": round(distance, 4),
+                "average_rating": toilet.average_rating,
+                "review_count": toilet.review_count,
                 "map_link": f"routing.html?lat={toilet.location.latitude}&lon={toilet.location.longitude}&name={toilet.name}&distance={round(distance * 1000)}&duration={max(round(distance * 12), 1)}&label={toilet.info or ''}"
             })
         return jsonify(result)
@@ -71,6 +73,40 @@ def get_nearest():
         app.logger.exception("Unexpected server error")
         return jsonify({"error": "Server error", "detail": str(ex)}), 500
 
+@app.route("/api/add_review", methods=["POST"])
+def add_review():
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"status": "error", "message": "Invalid JSON"}), 400
+            
+        toilet_name = data.get("name")
+        rating = data.get("rating")
+        
+        if not toilet_name or not rating:
+            return jsonify({"status": "error", "message": "ข้อมูลไม่ครบถ้วน"}), 400
+            
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE toilets 
+            SET total_stars = total_stars + ?, review_count = review_count + 1 
+            WHERE name = ?
+        """, (rating, toilet_name))
+
+        if cursor.rowcount == 0:
+            print(f"⚠️ หาห้องน้ำชื่อ '{toilet_name}' ไม่เจอในระบบ")
+        else:
+            print(f"✅ อัปเดตรีวิวให้ '{toilet_name}' สำเร็จ (Row count: {cursor.rowcount})")
+            
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"status": "success", "message": "บันทึกรีวิวสำเร็จ"}), 200
+        
+    except Exception as ex:
+        app.logger.exception("Error adding review")
+        return jsonify({"status": "error", "message": str(ex)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, port=5000)

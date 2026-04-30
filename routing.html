@@ -37,7 +37,7 @@
             </div>
 
             <div class="floating-action-area">
-                <a href="home.html" class="btn-end-journey">จบการเดินทาง</a>
+                <button class="btn-end-journey" onclick="openEndJourneyReview()">จบการเดินทาง</button>
             </div>
         </main>
 
@@ -57,6 +57,22 @@
                 <span>ตั้งค่า</span>
             </a>
         </nav>
+    </div>
+
+    <div id="reviewPopup" class="custom-popup-overlay">
+        <div class="custom-popup-box" style="position: relative;">
+            <i class="fa-solid fa-xmark close-icon-x" id="closeReviewBtn"></i>
+            <h3 id="reviewTitle">รีวิวห้องน้ำ</h3>
+            <div class="star-rating-box" id="starContainer">
+                <i class="fa-solid fa-star" data-rating="1"></i>
+                <i class="fa-solid fa-star" data-rating="2"></i>
+                <i class="fa-solid fa-star" data-rating="3"></i>
+                <i class="fa-solid fa-star" data-rating="4"></i>
+                <i class="fa-solid fa-star" data-rating="5"></i>
+            </div>
+            <p id="reviewStatus" class="review-status-text">แตะที่ดาวเพื่อให้คะแนน</p>
+            <button class="btn-submit-review" id="saveReviewBtn">บันทึกรีวิว</button>
+        </div>
     </div>
 
     <div id="comingSoonPopup" class="custom-popup-overlay">
@@ -192,6 +208,78 @@
         } else {
             alert('เบราว์เซอร์ของคุณไม่รองรับ GPS กรุณาเปิด GPS เพื่อใช้งานนำทาง');
         }
+
+        // ระบบรีวิวหลังจบการเดินทาง
+        let currentRating = 0;
+
+        function openEndJourneyReview() {
+            const savedRating = localStorage.getItem(`review_${destName}`);
+            const statusText = document.getElementById('reviewStatus');
+            document.getElementById('reviewTitle').textContent = `รีวิว: ${destName}`;
+
+            if (savedRating) {
+                currentRating = parseInt(savedRating);
+                statusText.textContent = "คุณเคยรีวิวแล้ว (สามารถแก้ไขได้)";
+            } else {
+                currentRating = 0;
+                statusText.textContent = "แตะที่ดาวเพื่อให้คะแนน";
+            }
+            updateStarsUI(currentRating);
+            document.getElementById('reviewPopup').classList.add('show');
+        }
+
+        function updateStarsUI(rating) {
+            document.querySelectorAll('#starContainer i').forEach(star => {
+                if (parseInt(star.dataset.rating) <= rating) {
+                    star.classList.add('star-active');
+                } else {
+                    star.classList.remove('star-active');
+                }
+            });
+        }
+
+        document.querySelectorAll('#starContainer i').forEach(star => {
+            star.addEventListener('click', function() {
+                currentRating = parseInt(this.dataset.rating);
+                updateStarsUI(currentRating);
+                document.getElementById('reviewStatus').textContent = `คุณให้คะแนน ${currentRating} ดาว`;
+            });
+        });
+
+        document.getElementById('saveReviewBtn').addEventListener('click', function() {
+            if (currentRating > 0) {
+                fetch('/api/add_review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: destName.trim(), rating: currentRating })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        localStorage.setItem(`review_${destName}`, currentRating);
+                        alert('ขอบคุณสำหรับรีวิวค่ะ!');
+                        window.location.href = 'home.html';
+                    } else {
+                        alert('เกิดข้อผิดพลาด: ' + data.message);
+                    }
+                })
+                .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'));
+            } else {
+                alert('กรุณาเลือกดาวก่อนบันทึกค่ะ');
+            }
+        });
+
+        document.getElementById('closeReviewBtn').addEventListener('click', function() {
+            document.getElementById('reviewPopup').classList.remove('show');
+            window.location.href = 'home.html';
+        });
+
+        document.getElementById('reviewPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+                window.location.href = 'home.html';
+            }
+        });
 
         // ระบบ Popup ฟีเจอร์ที่ยังไม่เปิดใช้งาน
         const popup = document.getElementById('comingSoonPopup');

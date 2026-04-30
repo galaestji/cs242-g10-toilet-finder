@@ -344,7 +344,19 @@ body {
 }
 
 .status-open { color: var(--green); font-weight: 600;}
-.status-time, .card-rating { color: var(--text-gray); }
+.status-time { color: var(--text-gray); }
+.card-rating {
+    color: var(--text-gray);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    background: #fff;
+}
 .rating-star { color: var(--yellow); }
 
 .card-meta-row {
@@ -523,6 +535,7 @@ body {
     padding: 16px; border-radius: 30px;
     font-size: 18px; font-weight: 600;
     text-decoration: none;
+    border: none; outline: none; cursor: pointer;
     box-shadow: 0 6px 15px rgba(220, 53, 69, 0.3);
     transition: all 0.2s;
 }

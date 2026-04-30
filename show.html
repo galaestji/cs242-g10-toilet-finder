@@ -297,6 +297,59 @@
             }
         });
 
+        // ระบบ drag bottom sheet
+        (function() {
+            const sheet = document.querySelector('.bottom-sheet');
+            const handle = document.querySelector('.drag-handle');
+
+            let startY = 0;
+            let currentTranslateY = 0;
+            let dragTranslateY = 0;
+            let isDragging = false;
+            let isCollapsed = false;
+
+            function getCollapsedY() {
+                return sheet.offsetHeight - 50;
+            }
+
+            function snapTo(collapsed) {
+                isCollapsed = collapsed;
+                currentTranslateY = collapsed ? getCollapsedY() : 0;
+                sheet.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+                sheet.style.transform = `translateY(${currentTranslateY}px)`;
+            }
+
+            handle.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                dragTranslateY = currentTranslateY;
+                sheet.style.transition = 'none';
+            }, { passive: true });
+
+            window.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                const deltaY = e.touches[0].clientY - startY;
+                const newY = Math.max(0, Math.min(getCollapsedY(), dragTranslateY + deltaY));
+                sheet.style.transform = `translateY(${newY}px)`;
+            }, { passive: true });
+
+            window.addEventListener('touchend', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                const endY = e.changedTouches[0].clientY;
+                const deltaY = endY - startY;
+                if (isCollapsed) {
+                    snapTo(deltaY < -30 ? false : true);
+                } else {
+                    snapTo(deltaY > 60 ? true : false);
+                }
+            });
+
+            handle.addEventListener('click', function() {
+                snapTo(!isCollapsed);
+            });
+        })();
+
         // ระบบรีวิวห้องน้ำ
         let currentReviewToilet = "";
         let currentRating = 0;

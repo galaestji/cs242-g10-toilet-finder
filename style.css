@@ -341,15 +341,19 @@ body {
 }
 
 .card-status-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 8px;
     font-size: 13px;
     margin-bottom: 8px;
 }
 
+
 .status-open { color: var(--green); font-weight: 600;}
 .status-time { color: var(--text-gray); }
 .card-rating {
+    flex-shrink: 0;
     color: var(--text-gray);
     display: inline-flex;
     align-items: center;

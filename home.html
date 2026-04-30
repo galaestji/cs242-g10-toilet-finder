@@ -118,13 +118,13 @@
                     message = 'กรุณาอนุญาตให้เข้าถึง GPS เพื่อค้นหาห้องน้ำใกล้คุณ';
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    message = 'ไม่สามารถรับตำแหน่ง GPS ได้ กรุณาลองใหม่';
+                    message = 'ไม่สามารถรับตำแหน่ง GPS ได้ กรุณาลองใหม่อีกครั้ง';
                     break;
                 case error.TIMEOUT:
-                    message = 'ขอเวลาหาพิกัดนานเกินไป กรุณาลองใหม่';
+                    message = 'ค้นหาตำแหน่งนานเกินไป กรุณาตรวจสอบว่าเปิดตำแหน่ง GPS แล้วหรือยัง';
                     break;
                 default:
-                    message = 'เกิดข้อผิดพลาดในการอ่านตำแหน่ง GPS';
+                    message = 'เกิดข้อผิดพลาดในการอ่านตำแหน่ง GPS กรุณาลองใหม่อีกครั้ง';
             }
             alert(message);
             locationInput.value = '';

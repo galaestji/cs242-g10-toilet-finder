@@ -7,7 +7,7 @@ class Toilet:
         if not name or not name.strip():
             raise ValueError("Toilet name cannot be empty")
         self._name = name.strip()
-        self._floor = int(floor)
+        self._floor = str(floor) if floor is not None else ""
         self._info = info or ""
         self._location = location
         self._image_filename = image_filename
@@ -29,8 +29,8 @@ class Toilet:
         return self._floor
 
     @floor.setter
-    def floor(self, value: int):
-        self._floor = int(value)
+    def floor(self, value):
+        self._floor = str(value) if value is not None else ""
 
     @property
     def info(self) -> str:

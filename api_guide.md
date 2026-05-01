@@ -110,3 +110,26 @@ fetch("http://127.0.0.1:5000/api/nearest", {
 2. คำนวณระยะทางด้วย Haversine Algorithm
 3. เลือกห้องน้ำที่ใกล้ที่สุด 3 อันดับ
 4. ส่งผลลัพธ์กลับเป็น JSON พร้อม Google Maps link
+
+---
+
+## 🗄️ Database Backup
+
+ระบบมี automation script สำหรับสำรองฐานข้อมูล `toilets.db` โดยอัตโนมัติ
+
+### วิธีใช้
+
+```bash
+python backup.py
+```
+
+### การทำงาน
+- สำรองไฟล์ `toilets.db` ไปยังโฟลเดอร์ `backups/`
+- ตั้งชื่อไฟล์ตาม timestamp เช่น `toilets_backup_20260501_140050.db`
+- เก็บ backup ล่าสุดไว้ 5 ชุด และลบอันเก่าออกอัตโนมัติ
+
+### ตัวอย่าง Output
+
+```
+Backup saved: backups\toilets_backup_20260501_140050.db (16.0 KB)
+```

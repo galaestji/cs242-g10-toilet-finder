@@ -137,22 +137,51 @@
             metaTime.innerHTML = '<i class="fa-regular fa-clock"></i> ' + cardDuration + ' นาที';
         }
 
+        var straightLine = null;
+
+        function drawMarkers(userLat, userLng) {
+            var icons = [
+                '<i class="fa-solid fa-location-dot" style="color:#DC3545;text-shadow:0 0 2px rgba(0,0,0,0.3);"></i>',
+                '<i class="fa-solid fa-location-dot" style="color:#0056B3;text-shadow:0 0 2px rgba(0,0,0,0.3);"></i>'
+            ];
+            [[userLat, userLng], [destLat, destLng]].forEach(function(latlng, i) {
+                L.marker(latlng, {
+                    icon: L.divIcon({ className: 'custom-map-pin', html: icons[i], iconSize: [30, 42], iconAnchor: [15, 42] })
+                }).addTo(map);
+            });
+        }
+
+        function drawFallbackLine(userLat, userLng) {
+            if (straightLine) map.removeLayer(straightLine);
+            straightLine = L.polyline([[userLat, userLng], [destLat, destLng]], {
+                color: '#FF7043', weight: 5, opacity: 0.7, dashArray: '10, 8'
+            }).addTo(map);
+            map.fitBounds(straightLine.getBounds(), { padding: [80, 80] });
+        }
+
         // 3. ฟังก์ชันดึงตำแหน่งปัจจุบัน (GPS จริง)
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 var userLat = position.coords.latitude;
                 var userLng = position.coords.longitude;
 
+                drawMarkers(userLat, userLng);
+
                 // 4. สร้างระบบนำทาง
+                var routingDone = false;
+                var fallbackTimer = setTimeout(function() {
+                    if (!routingDone) drawFallbackLine(userLat, userLng);
+                }, 6000);
+
                 var control = L.Routing.control({
-                    router: L.Routing.osrmv1({ 
+                    router: L.Routing.osrmv1({
                         serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1',
                         profile: 'foot',
                         useHints: false
                     }),
                     waypoints: [
-                        L.latLng(userLat, userLng), // ตำแหน่งปัจจุบันของคุณ
-                        L.latLng(destLat, destLng)  // ห้องน้ำปลายทาง
+                        L.latLng(userLat, userLng),
+                        L.latLng(destLat, destLng)
                     ],
                     lineOptions: {
                         styles: [{ color: '#FF7043', weight: 6, opacity: 0.8 }]
@@ -161,49 +190,31 @@
                     routeWhileDragging: false,
                     draggableWaypoints: false,
                     show: false,
-                    createMarker: function(i, waypoint, n) {
-                        // กำหนด Icon ตามตำแหน่ง
-                        var iconHtml = '';
-                        if (i === 0) {
-                            // จุดเริ่มต้น
-                            iconHtml = '<i class="fa-solid fa-location-dot" style="color: #DC3545; text-shadow: 0 0 2px rgba(0,0,0,0.3);"></i>';
-                        } else {
-                            // จุดปลายทาง
-                            iconHtml = '<i class="fa-solid fa-location-dot" style="color: #0056B3; text-shadow: 0 0 2px rgba(0,0,0,0.3);"></i>'
-                        }
-
-                        var markerIcon = L.divIcon({
-                            className: 'custom-map-pin',
-                            html: iconHtml,
-                            iconSize: [30, 42],
-                            iconAnchor: [15, 42]
-                        });
-                        
-                        return L.marker(waypoint.latLng, { icon: markerIcon });
-                    }
+                    createMarker: function() { return null; }
                 }).addTo(map);
 
-                function updateRouteInfo(route) {
+                control.on('routesfound', function(e) {
+                    routingDone = true;
+                    clearTimeout(fallbackTimer);
+                    if (straightLine) { map.removeLayer(straightLine); straightLine = null; }
+                    map.fitBounds(L.latLngBounds([userLat, userLng], [destLat, destLng]), { padding: [100, 100] });
                     if (!Number.isNaN(cardDistance) && cardDistance > 0) {
                         if (metaDist) metaDist.textContent = cardDistance + ' เมตร';
                         if (metaTime) metaTime.innerHTML = '<i class="fa-regular fa-clock"></i> ' + cardDuration + ' นาที';
                     }
-                }
-
-                control.on('routesfound', function(e) {
-                    var route = e.routes[0];
-                    map.fitBounds(L.latLngBounds([userLat, userLng], [destLat, destLng]), { padding: [100, 100] });
-                    updateRouteInfo(route);
                 });
 
-                control.on('routeselected', function(e) {
-                    updateRouteInfo(e.route);
+                control.on('routingerror', function() {
+                    routingDone = true;
+                    clearTimeout(fallbackTimer);
+                    drawFallbackLine(userLat, userLng);
                 });
 
             }, function() {
                 alert("กรุณาเปิด GPS และอนุญาตการเข้าถึงตำแหน่งเพื่อนำทาง");
             }, {
-                enableHighAccuracy: true 
+                enableHighAccuracy: true,
+                timeout: 10000
             });
         } else {
             alert('เบราว์เซอร์ของคุณไม่รองรับ GPS กรุณาเปิด GPS เพื่อใช้งานนำทาง');
